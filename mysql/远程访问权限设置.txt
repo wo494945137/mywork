@@ -1,0 +1,12 @@
+二、安装mysql
+1、安装mysql-installer-community-5.7.22.1.msi
+2、在安装的时候，注意不要新建新用户
+3、新建完后，打开开始菜单，mysql client 输入安装时候设置的密码
+修改远程访问权限
+mysql>use mysql;
+mysql>update user set host = '%' where user = 'root';
+mysql>select host, user from user;
+mysql>FLUSH PRIVILEGES;
+4、修改mysql编码字符集
+先备份：C:\ProgramData\MySQL\MySQL Server 5.7\my.ini（默认目录，相对应的自己找一下，该目录为隐藏目录），再用项目中的文件替换
+5、重启mysql服务

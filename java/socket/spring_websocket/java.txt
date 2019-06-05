@@ -1,0 +1,8 @@
+    @Autowired
+    SimpMessagingTemplate messagingTemplate;
+
+      AsyncExecutor.execute(() ->{
+                for (String userId:useridList) {
+                    messagingTemplate.convertAndSendToUser(userId,"/queue/process", JSONObject.toJSON(processEvent));
+                }
+            });

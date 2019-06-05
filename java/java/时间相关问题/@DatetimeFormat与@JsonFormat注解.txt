@@ -1,0 +1,2 @@
+@DatetimeFormat是将String转换成Date，一般前台给后台传值时用
+@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")  将Date转换成String  一般后台传值给前台时   （注意，HH大写才能是24时，如果是小写hh 就只能是1-12个小时）

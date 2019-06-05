@@ -1,0 +1,195 @@
+镜像iso文件  创建多个容器 每个容器都是一个服务
+
+
+0、  #安装docker
+yum -y install docker-io
+
+启动docker服务 
+service docker start
+
+1、 #从官网拉取镜像
+
+docker pull <镜像名:tag>
+
+如：docker pull centos(拉取centos的镜像到本机)
+
+
+2、#搜索在线可用镜像名
+
+docker search <镜像名>
+
+如：docker search centos( 在线查找centos的镜像)
+
+
+3、#查询所有的镜像，默认是最近创建的排在最上
+
+docker images
+
+
+4、#查看正在运行的容器
+
+docker ps
+
+
+5、#删除单个镜像
+
+docker rmi -f <镜像ID>
+
+
+6、#启动、停止操作
+
+docker stop <容器名or ID> #停止某个容器 
+
+docker start <容器名or ID> #启动某个容器 
+
+docker kill <容器名or ID> #杀掉某个容器
+
+
+
+7、#查询某个容器的所有操作记录。
+
+docker logs {容器ID|容器名称} 
+
+
+
+8、# 制作镜像  使用以下命令，根据某个“容器 ID”来创建一个新的“镜像”：
+
+docker commit 93639a83a38e  wsl/javaweb:0.1
+
+
+
+9、#启动一个容器
+
+docker run -d -p 58080:8080 --name javaweb wsl/javaweb:0.1 /root/run.sh
+
+解释：-d：表示以“守护模式”执行/root/run.sh脚本
+
+          -p：表示宿主机与容器的端口映射，此时将容器内部的 8080 端口映射为宿主机的 58080 端口，这样就向外界暴露了 58080 端口，可通过 Docker 网桥来访问容器内部的 8080 端口了。
+
+          -name:为容器命名
+		  
+		  
+
+10、#最后补充一个启动docker服务的命令
+
+很简单：
+
+service docker start
+
+
+
+
+
+
+
+我们要怎么进入到docker容器呢？
+ 
+ 
+1:使用docker attach命令
+我们使用
+ 
+docker attach db3 或者 docker attach d48b21a7e439
+ 
+
+ 
+db3是后台容器的NAMES,d48b21a7e439是容器的进程ID  CONTAINER ID
+然后就进去了这个容器的ssh界面。
+但是它有一个缺点，只要这个连接终止，或者使用了exit命令，容器就会退出后台运行
+ 
+ 
+2:使用docker exec命令
+这个命令使用exit命令后，不会退出后台，一般使用这个命令，使用方法如下
+ 
+docker exec -it db3 /bin/sh 或者 docker exec -it d48b21a7e439 /bin/sh
+ 
+docker exec -it 775c7c9ee1e1 /bin/bash
+ 
+db3是后台容器的NAMES,d48b21a7e439是容器的进程ID  CONTAINER ID
+ /bin/sh 是固定写法
+它也能进入这个容器
+
+
+
+
+
+
+
+
+
+
+
+批量删除----------------------------------------------------------------------
+
+
+  杀死所有正在运行的容器
+docker kill $(docker ps -a -q)
+
+
+        删除所有已经停止的容器
+docker rm $(docker ps -a -q)
+
+
+        删除所有未打 dangling 标签的镜像
+docker rmi $(docker images -q -f dangling=true)
+
+
+         删除所有镜像
+docker rmi $(docker images -q)
+
+
+        强制删除镜像名称中包含“doss-api”的镜像
+docker rmi --force $(docker images | grep doss-api | awk '{print $3}')
+
+
+1、删除所有容器
+docker rm `docker ps -a -q`
+2、删除所有镜像
+docker rmi `docker images -q`
+3、按条件删除镜像
+　　没有打标签
+
+docker rmi `docker images -q | awk '/^<none>/ { print $3 }'`
+　　镜像名包含关键字
+
+docker rmi --force `docker images | grep doss-api | awk '{print $3}'`    //其中doss-api为关键字
+
+--------------------------------------------------------------------------------------------------------------------------
+
+
+
+docker端口映射或启动容器时报错Error response from daemon: driver failed programming external connectivity on endpoint quirky_allen
+
+
+解决:
+
+重启docker服务后再启动容器
+systemctl restart docker
+docker start foo
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+
+Docker常用命令详解
+ docker ps 查看当前正在运行的容器
+
+ docker ps -a 查看所有容器的状态
+
+ docker start/stop id/name 启动/停止某个容器
+
+ docker attach id 进入某个容器(使用exit退出后容器也跟着停止运行)
+
+ docker exec -ti id 启动一个伪终端以交互式的方式进入某个容器（使用exit退出后容器不停止运行）
+
+ docker images 查看本地镜像
+ docker rm id/name 删除某个容器
+ docker rmi id/name 删除某个镜像
+
+ docker run --name test -ti ubuntu /bin/bash  复制ubuntu容器并且重命名为test且运行，然后以伪终端交互式方式进入容器，运行bash
+
+ docker build -t soar/centos:7.1 .  通过当前目录下的Dockerfile创建一个名为soar/centos:7.1的镜像
+
+ docker run -d -p 2222:22 --name test soar/centos:7.1  以镜像soar/centos:7.1创建名为test的容器，并以后台模式运行，并做端口映射到宿主机2222端口，P参数重启容器宿主机端口会发生改变
+
+ 

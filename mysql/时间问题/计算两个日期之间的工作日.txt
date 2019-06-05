@@ -1,0 +1,169 @@
+
+DROP FUNCTION IF EXISTS `workdaynum`;
+DELIMITER $$
+CREATE FUNCTION `workdaynum`(`datefrom` date,`dateto` date) 
+RETURNS int(20) NO SQL
+BEGIN
+	declare days int default 1;
+	if (datefrom > dateto  or year(datefrom) != year(dateto)) then
+	   return -1;
+	end if;
+	
+	set days = 
+	   case 
+	   when week(dateto)-week(datefrom) = 0 then 
+	        dayofweek(dateto) - dayofweek(datefrom) + 1
+		  - case 
+		    when (dayofweek(datefrom) > 1 and dayofweek(dateto) < 7) then 0
+		    when (dayofweek(datefrom) = 1 and dayofweek(dateto) =7) then 2
+		    else 1
+		    end
+	   else (week(dateto)-week(datefrom)-1) * 5
+	      + case 
+		    when dayofweek(datefrom) = 1 then 5
+			when dayofweek(datefrom) = 7 then 0
+		    else 7 - dayofweek(datefrom)
+			end
+		  + case 
+		    when dayofweek(dateto) = 1 then 0
+			when dayofweek(dateto) = 7 then 5
+			else dayofweek(dateto) - 1
+			end
+	   end;
+			 
+	   return days;
+end$$
+DELIMITER ;
+-----------------------------------------------------------------------------------------------------------------------------
+
+！！上面思路有问题   自己改造好的
+
+DROP FUNCTION IF EXISTS `workdaynum`;
+DELIMITER $$
+CREATE FUNCTION `workdaynum`(`datefrom` date,`dateto` date) 
+RETURNS int(20) NO SQL
+BEGIN
+	declare days int default 1;
+	if (datefrom > dateto  or year(datefrom) != year(dateto)) then
+	   return -1;
+	end if;
+	
+	set days = 
+	   case 
+	   when week(dateto)-week(datefrom) = 0 then 
+	        dayofweek(dateto) - dayofweek(datefrom) 
+		  - case 
+		    when (dayofweek(datefrom) > 0 and dayofweek(dateto) < 7) then 0
+		    when (dayofweek(datefrom) = 1 and dayofweek(dateto) =7) then 2
+		    else 1
+		    end
+	   else (week(dateto)-week(datefrom) -1) * 5
+	      + case 
+		    when dayofweek(datefrom) > 1 and dayofweek(datefrom) < 7   then 7-dayofweek(datefrom)-1
+      else 0
+			end
+		  + case 
+		  when dayofweek(dateto) > 1 and dayofweek(dateto) < 7   then dayofweek(dateto)-1
+      else 0
+			end
+	   end;
+			 
+	   return days;
+end$$
+
+SELECT workdaynum('2018-10-04','2018-10-10')
+FROM DUAL
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+上述没有考虑到跨年   跨年的改造
+
+DROP FUNCTION IF EXISTS `workdaynum`;
+
+DELIMITER $$
+CREATE FUNCTION `workdaynum`(`datefrom` date,`dateto` date) 
+RETURNS int(20) NO SQL
+BEGIN
+	declare days int default 1;
+	declare firstdays int default 0;
+	declare lastdays int default 0;
+
+
+
+	if (datefrom > dateto  or year(datefrom) != year(dateto)) then
+set firstdays = 
+	   case 
+	   when week(CONCAT(year(dateto),'-12-31'))-week(datefrom) = 0 then 
+	        dayofweek(CONCAT(year(dateto),'-12-31')) - dayofweek(datefrom) 
+		  - case 
+		    when (dayofweek(datefrom) > 0 and dayofweek(CONCAT(year(datefrom),'-12-31')) < 7) then 0
+		    when (dayofweek(datefrom) = 1 and dayofweek(CONCAT(year(datefrom),'-12-31')) =7) then 2
+		    else 1
+		    end
+	   else (week(CONCAT(year(dateto),'-12-31'))-week(datefrom) -1) * 5
+	      + case 
+		    when dayofweek(datefrom) > 1 and dayofweek(datefrom) < 7   then 7-dayofweek(datefrom)-1
+      else 0
+			end
+		  + case 
+		  when dayofweek(CONCAT(year(datefrom),'-12-31')) > 1 and dayofweek(CONCAT(year(datefrom),'-12-31')) < 7   then dayofweek(CONCAT(year(datefrom),'-12-31'))-1
+      else 0
+			end
+	   end;
+ 
+set lastdays = 
+	   case 
+	   when week(dateto)-week(CONCAT(year(dateto),'-1-1')) = 0 then 
+	        dayofweek(dateto) - dayofweek(CONCAT(year(dateto),'-1-1')) 
+		  - case 
+		    when (dayofweek(CONCAT(year(dateto),'-1-1')) > 0 and dayofweek(dateto) < 7) then 0
+		    when (dayofweek(CONCAT(year(dateto),'-1-1')) = 1 and dayofweek(dateto) =7) then 2
+		    else 1
+		    end
+	   else (week(dateto)-week(CONCAT(year(dateto),'-1-1')) -1) * 5
+	      + case 
+		    when dayofweek(CONCAT(year(dateto),'-1-1')) > 1 and dayofweek(CONCAT(year(dateto),'-1-1')) < 7   then 7-dayofweek(CONCAT(year(dateto),'-1-1'))-1
+      else 0
+			end
+		  + case 
+		  when dayofweek(dateto) > 1 and dayofweek(dateto) < 7   then dayofweek(dateto)-1
+      else 0
+			end
+	   end;
+    return (firstdays +lastdays)+(year(dateto)-year(datefrom)-1)*365/7*5;
+
+	end if;
+	
+	set days = 
+	   case 
+	   when week(dateto)-week(datefrom) = 0 then 
+	        dayofweek(dateto) - dayofweek(datefrom) 
+		  - case 
+		    when (dayofweek(datefrom) > 0 and dayofweek(dateto) < 7) then 0
+		    when (dayofweek(datefrom) = 1 and dayofweek(dateto) =7) then 2
+		    else 1
+		    end
+	   else (week(dateto)-week(datefrom) -1) * 5
+	      + case 
+		    when dayofweek(datefrom) > 1 and dayofweek(datefrom) < 7   then 7-dayofweek(datefrom)-1
+      else 0
+			end
+		  + case 
+		  when dayofweek(dateto) > 1 and dayofweek(dateto) < 7   then dayofweek(dateto)-1
+      else 0
+			end
+	   end;
+			 
+	   return days;
+end$$
+
+
+
+
+SELECT week(CONCAT(year('2018-10-08'),'-12-31'))
+
+
+SELECT workdaynum('2018-12-26','2019-1-1')
+FROM DUAL
+
+
+SELECT week('2018-10-08')
+FROM DUAL

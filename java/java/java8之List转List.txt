@@ -1,0 +1,2 @@
+      List<Integer> codesInteger = codes.stream().map(Integer::parseInt).collect(Collectors.toList());
+     转换list列表String到列表Intger，java8提供了stream很好的进行操作。

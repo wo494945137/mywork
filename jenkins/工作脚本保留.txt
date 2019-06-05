@@ -1,0 +1,52 @@
+#!/bin/bash -ilex
+
+file1=/hlinin/docker/service/develop/hlinin-web/target
+file2=/hlinin/soft/jenkins/workspace/hlinin-web-develop/dist
+DIR=/hlinin/docker/service/develop
+DIR1=/hlinin/soft/jenkins/workspace/hlinin-web-develop
+
+rm -rf $file1/*
+
+cd $DIR1
+npm install
+npm run build
+
+cp -rf $file2 $file1
+
+cd $DIR
+sh start.sh
+
+
+----------------------------------------------------------------------------------------------------------------------
+#!/bin/bash -ilex
+
+file1=/hlinin/docker/service/yanshi/hlinin-web/target
+file2=/hlinin/soft/jenkins/workspace/hlinin-web-yanshi/dist
+file3=/hlinin/soft/jenkins/workspace/hlinin-web-yanshi/node_modules
+file4=/hlinin/soft/jenkins/workspace/hlinin-web-yanshi/server.js
+file5=/hlinin/soft/jenkins/workspace/hlinin-web-yanshi/server-config.js
+DIR=/hlinin/docker/service/yanshi
+DIR1=/hlinin/soft/jenkins/workspace/hlinin-web-yanshi
+
+rm -rf $file1/*
+
+cd $DIR1
+npm install
+npm run build
+
+
+cp -rf $file2 $file1
+cp -rf $file3 $file1
+cp -f $file4 $file1
+cp -f $file5 $file1
+
+cd $DIR
+sh start.sh
+
+
+
+
+
+
+
+

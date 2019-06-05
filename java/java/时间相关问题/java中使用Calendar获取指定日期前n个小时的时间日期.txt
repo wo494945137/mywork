@@ -1,0 +1,16 @@
+/**
+ * 取到 hours 以前时间
+ * @param hours
+ * @return
+ */
+public static Date headDate(String date ,int hours) throws ParseException {
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date));
+    cal.add(Calendar.HOUR_OF_DAY, hours);
+    return cal.getTime();
+}
+--------------------- 
+作者：冰雪Love齐迹 
+来源：CSDN 
+原文：https://blog.csdn.net/liqi_q/article/details/53814387 
+版权声明：本文为博主原创文章，转载请附上博文链接！

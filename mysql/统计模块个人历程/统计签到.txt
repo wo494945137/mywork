@@ -1,0 +1,38 @@
+
+
+
+select a.*,b.count as "应到人数" from meeting a
+left join (
+select meeting_id,count(0) as count from meeting_person
+where id = 5
+ group by meeting_id
+
+) b on a.id=b.meeting_id
+where id = 5
+
+
+
+
+
+
+
+
+
+
+
+
+
+select b.person_id,b.person_name,
+sum(b.cd) as "迟到",
+sum(b.qd) as "签到"  
+
+from (
+select person_id,person_name,min(happen_time),max(cd) as cd,max(qd) as qd
+from (
+select * ,
+case when happen_time>start_time then 1 else 0 end as cd,
+case when happen_time<=start_time then 1 else 0 end as qd 
+from attendance_log where event_type = 1
+) a  group by person_id,person_name
+) b
+group by b.person_id,b.person_name

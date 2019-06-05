@@ -1,0 +1,46 @@
+ 
+
+这个取之前90天的我测试不管用
+//Date date = new Date(System.currentTimeMillis() - 1000 * 60 * 60);  
+
+//自己测试，管用
+  Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        c.add(Calendar.DATE, - 90);
+        Date date = c.getTime();
+
+    File folder = new File(tempfolder);  
+    File[] files = folder.listFiles();  
+    for (int i=0;i<files.length;i++){  
+        File file = files[i];  
+        if (new Date(file.lastModified()).before(date)){  
+                  deleteFile(file);
+
+        }  
+    }  
+
+
+
+ /**
+     * 先根遍历序递归删除文件夹
+     *
+     * @param dirFile 要被删除的文件或者目录
+     * @return 删除成功返回true, 否则返回false
+     */
+    public static boolean deleteFile(File dirFile) {
+        // 如果dir对应的文件不存在，则退出
+        if (!dirFile.exists()) {
+            return false;
+        }
+
+        if (dirFile.isFile()) {
+            return dirFile.delete();
+        } else {
+
+            for (File file : dirFile.listFiles()) {
+                deleteFile(file);
+            }
+        }
+
+        return dirFile.delete();
+    }

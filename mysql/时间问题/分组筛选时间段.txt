@@ -1,0 +1,75 @@
+
+
+
+
+
+
+需求：先求出这条记录与下条记录间隔的时间  超过某天算超时    然后只展示某个station最新stastu的数据
+
+------------------------------------------------------------------------------------
+  select a.* from (
+        select max(x.build_status) as build_status,x.station_id from (
+        select * from (
+
+        select   CASE WHEN t.build_status = 1 AND t.difftime>2 THEN '达成意向'
+        WHEN t.build_status = 2 AND t.difftime>2 THEN '待施工'
+        WHEN t.build_status = 4 AND t.difftime>30 THEN '已安排施工'
+        WHEN t.build_status = 5 AND t.difftime>3 THEN  '施工完成'
+        END  AS overtime_state,
+        CASE WHEN t.build_status = 1 AND t.difftime>2 THEN t.difftime-2
+        WHEN t.build_status = 2 AND t.difftime>2 THEN t.difftime-2
+        WHEN t.build_status = 4 AND t.difftime>30 THEN t.difftime-30
+        WHEN t.build_status = 5 AND t.difftime>3 THEN  t.difftime-3
+        ELSE 1
+        END  AS overtime_day,
+
+        t.* from (
+        select a.*, TIMESTAMPDIFF(day ,a.build_date,if(b.build_date  is not null,b.build_date,NOW())) as difftime
+        from ap_station_build_log a
+        left join ap_station_build_log b on a.station_id = b.station_id and b.sort = a.sort+1
+        ) t
+        ) m
+        where m.overtime_state is not null
+        ) x
+        GROUP by  x.station_id
+        ) b left join (
+        select * from (
+
+        select   CASE WHEN t.build_status = 1 AND t.difftime>2 THEN '达成意向'
+        WHEN t.build_status = 2 AND t.difftime>2 THEN '待施工'
+        WHEN t.build_status = 4 AND t.difftime>30 THEN '已安排施工'
+        WHEN t.build_status = 5 AND t.difftime>3 THEN  '施工完成'
+        END  AS overtime_state,
+        CASE WHEN t.build_status = 1 AND t.difftime>2 THEN t.difftime-2
+        WHEN t.build_status = 2 AND t.difftime>2 THEN t.difftime-2
+        WHEN t.build_status = 4 AND t.difftime>30 THEN t.difftime-30
+        WHEN t.build_status = 5 AND t.difftime>3 THEN  t.difftime-3
+				ELSE 1
+
+        END  AS overtime_day,
+
+        t.* from (
+        select a.*, TIMESTAMPDIFF(day ,a.build_date,if(b.build_date  is not null,b.build_date,NOW())) as difftime
+        from ap_station_build_log a
+        left join ap_station_build_log b on a.station_id = b.station_id and b.sort = a.sort+1
+        ) t
+        ) m
+        where m.overtime_state is not null
+        ) a on b.station_id = a.station_id and b.build_status = a.build_status
+-----------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE `ap_station_build_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `station_id` varchar(20) NOT NULL COMMENT '网点代号',
+  `station_name` varchar(200) DEFAULT NULL COMMENT '网点名称',
+  `station_contact` varchar(50) DEFAULT NULL COMMENT '联系人',
+  `station_phone` varchar(50) DEFAULT NULL COMMENT '电话',
+  `operator_phone` varchar(50) DEFAULT NULL COMMENT '业务员电话',
+  `operator_name` varchar(100) DEFAULT NULL COMMENT '业务员姓名',
+  `operator_type` int(1) DEFAULT '0' COMMENT '业务类型',
+  `operator_id` int(11) DEFAULT NULL COMMENT '业务员ID',
+  `build_status` int(1) DEFAULT '1' COMMENT '施工状态 1-达成意向 2-待施工 3-待确认(作废) 4-已安排施工 5-施工完成 6-已上线 7-施工受阻',
+  `build_date` date DEFAULT NULL COMMENT '施工时间',
+  `sort` int(10) DEFAULT NULL COMMENT '排序',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COMMENT='网点施工状态操作历史表';
+

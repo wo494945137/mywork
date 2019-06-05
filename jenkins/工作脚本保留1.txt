@@ -1,0 +1,16 @@
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+pom.xml
+clean compile -Dmaven.test.skip=true package  -Dmaven.test.skip=true
+-----------------------------------------------------------------------------------------------------------------------
+#!/bin/bash -ilex
+file1=/hlinin/docker/service/develop/hlinin-biz/target/hlinin-biz.jar
+file2=/hlinin/soft/jenkins/workspace/hlinin-biz-develop/target/hlinin-biz.jar
+DIR=/hlinin/docker/service/develop
+rm -f $file1
+cp -f $file2 $file1
+cd $DIR
+sh start.sh

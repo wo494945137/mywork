@@ -1,0 +1,215 @@
+1、
+Thread.currentThread().getContextClassLoader().getResourceAsStream("/mypropertiestest.properties")读取src下的属性文件，通过测试，在windows和Linux下的tomcat和apusic都能成功。
+--------------------- 
+
+2、
+Thread.currentThread().getContextClassLoader().getResource("").getPath()
+这个方法 在linux下不能读取
+
+3、
+ Resource resource = new ClassPathResource("aspose/license.xml");
+        license = resource.getInputStream();
+
+
+
+以下是从网站copy过来的
+
+------------------------------------------
+
+	方式一：
+String fileName = this.getClass().getClassLoader().getResource("文件名").getPath();//获取文件路径
+String fileUtl = this.getClass().getResource("文件名").getFile();
+（在项目打成jar后的情况下getPath()与getFile()返回参数及用法的基本相同具体差异大研究）
+示例路径结果：/E:/idea_work/sofn-qry-web/target/classes/CityJson.js
+
+
+	方式二：
+File directory = new File("");//参数为空
+String courseFile = directory.getCanonicalPath()//标准的路径 ;
+String author =directory.getAbsolutePath()//绝对路径;
+（在jdk1.1后就有了此方法获取文件路径的方式存在了）
+示例路径结果：E:\idea_work\sofn-qry-web
+
+
+	方式三：
+java.net.URL uri = this.getClass().getResource("/");
+（获取到Class文件存放的路径）
+示例路径结果：file:/E:/idea_work/sofn-qry-web/target/test-classes/
+
+
+String property =System.getProperty("user.dir");
+
+	方式四：
+
+String property =System.getProperty("user.dir");
+（此方法可以得到该工程项目所有文件的相关路径及环境配置信息）
+示例输出结果：
+
+
+
+
+
+
+https://www.cnblogs.com/shuimuzhushui/p/7247864.html
+https://blog.csdn.net/Diamond_Tao/article/details/80010225
+本地读取资源文件
+java类中需要读取properties中的配置文件，可以采用文件（File）方式进行读取：
+
+1 File file = new File("src/main/resources/properties/basecom.properties");
+2 InputStream in = new FileInputStream(file);
+当在eclipse中运行（不部署到服务器上），可以读取到文件。
+
+服务器（Tomcat）读取资源文件
+方式一：采用流+Properties
+当工程部署到Tomcat中时，按照上边方式，则会出现找不到该文件路径的异常。经搜索资料知道，Java工程打包部署到Tomcat中时，properties的路径变到顶层（classes下），这是由Maven工程结构决定的。由Maven构建的web工程，主代码放在src/main/java路径下，资源放在src/main/resources路径下，当构建为war包的时候，会将主代码和资源文件放置classes文件夹下：
+
+
+
+并且，此时读取文件需要采用流（stream）的方式读取，并通过JDK中Properties类加载，可以方便的获取到配置文件中的信息，如下：
+
+1 InputStream in = this.getClass().getResourceAsStream("/properties/basecom.properties");
+2 Properties properties = new Properties();
+3 properties.load(in);
+4 properties.getProperty("property_name");
+ 其中properties前的斜杠，相对于调用类，共同的顶层路径。
+
+方式二：采用Spring注解
+如果工程中使用Spring，可以通过注解的方式获取配置信息，但需要将配置文件放到Spring配置文件中扫描后，才能将配置信息放入上下文。
+
+1 <context:component-scan base-package="com.xxxx.service"/>
+2 <context:property-placeholder location="classpath:properties/xxx.properties" ignore-unresolvable="true"/>
+然后在程序中可以使用 @Value进行获取properties文件中的属性值，如下：
+
+1 @Value("${xxxt.server}")
+2 private static String serverUrl;
+方式三：采用Spring配置
+也可以在Spring配置文件中读取属性值，赋予类成员变量
+
+复制代码
+ 1 <?xml version="1.0" encoding="UTF-8"?>
+ 2 <beans xmlns="http://www.springframework.org/schema/beans"
+ 3     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 4     xsi:schemaLocation="http://www.springframework.org/schema/beans 
+ 5     http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+ 6     
+ 7     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+ 8         <property name="location" value="classpath:properties/xxx.properties"/>
+ 9     </bean>
+10     
+11     <bean id="service" class="com.xxxx.service.ServiceImpl">
+12         <property name="serverUrl" value="${xxxt.server}" />
+13     </bean>
+14 
+15 </beans>
+复制代码
+ 举例说明，服务类：
+
+复制代码
+ 1 package com.springtest.service;
+ 2 
+ 3 public class ServiceImpl {
+ 4 
+ 5     private String serverUrl;
+ 6 
+ 7     public String getServerUrl() {
+ 8         return serverUrl;
+ 9     }
+10 
+11     public void setServerUrl(String serverUrl) {
+12         this.serverUrl = serverUrl;
+13     }
+14     
+15     public void sayHello(){
+16         System.out.println(serverUrl);
+17     }
+18 }
+复制代码
+ 配置文件：
+
+server=123.23.43.23
+ 测试：
+
+复制代码
+ 1 public class ServiceTest {
+ 2 
+ 3     public static void main(String[] args) {
+ 4         // TODO Auto-generated method stub
+ 5         ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:spring.xml");
+ 6         ServiceImpl s = ctx.getBean("service", ServiceImpl.class);
+ 7         s.sayHello();
+ 8     }
+ 9 
+10 }
+复制代码
+ 输出：
+
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+123.23.43.23
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+在实际开发过程中经常遇到需要读取工程目录下resources文件夹下配置文件的情况。本文主要介绍几种读取该目录下配置文件的方法，以便于在实际项目中可以灵活选用。本文主要介绍相对路径下的目录中配置文件的读取方法。现存在如下这样的工程目录：
+ 
+
+
+二、具体读取方法
+	 
+1、当需要读取当前路径下的properties文件时，即在本地没有部署到具体服务器上的情况：
+
+File file = new File("src/main/resources/test.properties");
+InputStream in = new FileInputStream(file);
+1
+2
+	
+2、当工程以war或者jar的形式部署到服务器后，在需要读取对应properties文件情况下，此时应该采取相对路径的读取方法。以下为采用流的方式进行读取。 
+
+
+从上图可知，当工程部署在服务器下时，配置文件以及代码都是在对应的classes文件夹下
+
+InputStream in = this.getClass().getResourceAsStream("/test.properties");
+Properties props = new Properties();
+InputStreamReader inputStreamReader = new InputStreamReader(in, "UTF-8");
+props.load(inputStreamReader);
+1
+2
+3
+4
+采用此种流的方式进行读取后，通过props.getProperty(key)的方式获取配置文件中key所对应的value的值。
+
+
+	3、我们也可以采用注解的方式进行配置文件读取，在springboot工程中不需要在spring配置文件中做相应的配置，可以直接使用该注解获取配置文件中key值对应的value值。
+
+@Value("${local.server.port}")// 注入端口号
+private int port;
+1
+2
+注意：当value出现中文时，会出现注入的值为乱码的现象。原因是在SpringBoot自动加载application.properties时默认采用unicode编码方式。解决办法如下所示：
+
+@RestController
+@RequestMapping(value = "/redis")
+@PropertySource(value = {"classpath:application.properties"},encoding="utf-8") 
+public class UserController extends BaseController{
+
+    @Autowired
+    IUserService userService;
+
+    @Autowired
+    IRedisService redisService;
+
+    @Value("${amchine.ip}")
+    private String ip;
+    }

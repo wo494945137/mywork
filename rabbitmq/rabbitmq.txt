@@ -1,0 +1,86 @@
+MQ（rabbitmq部署，消息同步配置，项目应用，如果消息过多，会保存到磁盘吗）
+1）、集群的模式有，普通集群（默认方式），镜像模式
+普通集群exchange，buindling再所有的节点上都会保存一份，但是queue只会存	储在其中的	一个节点上，但是所有的节点都会存储一份queue的meta信息。因	为这样有两个好处： 
+1）存储空间。如果每一个节点上都有全部的消息，有多少个节点就会有多少个消		息总量的copy。加入一个队列的消息占用的空间是1G，那么三个节点就是3G 
+2) 性能。消息需要在节点之间传输会有很大的网络开销。如果消息设置了durable		即持久化，还会增加很大的磁盘负载 
+这种集群方法的特点是 高吞吐量  非高可用 
+
+镜像模式
+镜像模式和普通模式的区别就是，队列的数据都镜像了一份到所有的节点上。这样	任何一个节点失效，不会影响整个集群的使用。 
+有三种镜像策略：
+all（队列将mirrored到所有集群中的节点中，当新节点添加进来时也会mirrored		到新的节点 ），
+exactly（需指定count）:如果节点数小于count数，则队列将mirrored到所有的节			点。如果节点数大于count，新的节点将不再创建队列的mirror（即使原			来已创建mirror的节点挂掉也不会创建）），
+nodes（对指定的节点进行mirror）
+2）、常用模式有：
+队列模式：生产者发布消息到队列，消费者根据队列名称接收消息（basicQos(1)			  表示同一时刻服务端只会发送一条消息给消费者）
+  生产者
+  		  channel.queueDeclare(queueName,true,false,false,null)
+channel.basicPublish (exchange,queueName,null,msg)
+消费者
+channel.queueDeclare(queueName,true,false,false,null)
+channel.basicConsume(queueName, true, consumer);
+Exchange：交换机类型分为（fanout、direct、topic）
+  		  direct：单播，匹配Exchange+ROUTING_KEY的队列
+  fanout：广播，匹配所有绑定Exchange的队列
+  topic: 匹配Exchange，通配符匹配routingKey，点号分割成n个词
+符号#：匹配一个或者多个词 lazy.# 可以匹配 lazy.irs或者lazy.irs.cor
+	符号*：只能匹配一个词 lazy.* 可以匹配 lazy.irs或者lazy.cor
+如果通配符为“#”，则同fanout
+如果通配符没有“#和*”，则同direct
+生产者
+channel.exchangeDeclare(exchange,type);
+channel.basicPublish (exchange,queueName,null,msg)
+消费者
+channel.queueDeclare(queueName,是否持久化,false,false,null)
+channel.queueBind(queue,exchange,routingKey);
+channel.basicConsume(queueName, autoAck, consumer);
+3）、集群选举机制
+1个最老的（队列最长的）的slaver提升为master，如果没有一个slaver是和master	同步的则会造成消息丢失，如果发布消息的时候，master同步消息的时候down，	会造成消息丢失，可以通过生产者发布消息一致性解决
+4）、镜像模式集群间同步方式
+默认手动同步，一个没有同步的mirror，它仍然会同步后续插入队列的数据，但是	队列前面的数据却没有。但是随着队列的不断消费，导致空缺的部分的消息被消费	掉了，此时mirror也可以是同步了的。 
+
+自动同步：如果配置了高可用策略是自动同步，当slaver起来后，队列中有大量的	消息需要同步，将会整个集群阻塞长时间的不能读写直到同步结束，参考资料	http://blog.csdn.net/kk185800961/article/details/55522513
+5）、生产者发布消息一致性：
+事务：txSelect()将当前channel设置成transaction模式, txCommit()提交事务以及	txRollback()回滚事务 效果同return，同步返回
+异步监听：
+return：publisher发送到exchange，异步返回
+confirm：publisher发送消息到exchange,queue,consumer收到消息后才会收到异步	收到消息
+6）、消费者消息一致性：
+手动ack：存在重复消费的问题
+如果消费者发送ack到服务端的时候，连接断开
+如果镜像模式下master收到了ack但是在广播给slaver的时候master挂掉的情况
+这个时候服务端会认为消息没有消费，会重新发送消息
+消息没有超时，断此消息是否需要重新投递给消费者的唯一依据是消费该消息的消	费者连接是否已经断开
+自动ack：存在丢失消息的问题
+自动ack指服务器是先ack然后发送到noAck=true的消费者，不管消费者是否消费成功，服务器都会认为消费成功
+7）、镜像模式配置
+ 
+连接集群
+Address[] addrArr ={new Address(hostname1, portnumber1),
+new Address(hostname2, portnumber2)};
+Connection conn = factory.newConnection(addrArr);
+消息队列持久化包括3个部分：
+1、exchange持久化，在声明时指定durable => true
+	2、queue持久化，在声明时指定durable => true
+	3、消息持久化，在投递时指定delivery_mode=> 2（1是非持久化）
+如果exchange和queue都是持久化的，那么它们之间的binding也是持久化的。	如果exchange和queue两者之间有一个持久化，一个非持久化，就不允许建	立绑定。
+注意：一旦创建了队列和交换机，就不能修改其标志了。例如，如果创建了一		个non-durable的队列，然后想把它改变成durable的，唯一的办法就是		删除这个队列然后重现创建。
+
+你可以查看哪些slave已经同步好了： 
+rabbitmqctl list_queues name slave_pids synchronised_slave_pids 
+你可以手动同步(默认手动同步)： 
+rabbitmqctl sync_queue name 
+你可以取消自动同步： 
+rabbitmqctl cancel_sync_queue name 
+
+https://www.cnblogs.com/piaolingzxh/p/5448927.html
+https://www.cnblogs.com/x-poior/p/6380064.html
+https://www.cnblogs.com/dreamroute/p/6251180.html
+https://www.cnblogs.com/jun-ma/p/4840869.html
+https://www.2cto.com/kf/201705/638847.html
+https://www.jianshu.com/p/80eefec808e5
+https://my.oschina.net/dlam/blog/807220
+http://blog.csdn.net/kk185800961/article/details/55522513
+https://www.jianshu.com/p/80eefec808e5
+https://blog.csdn.net/qq_38455201/article/details/80308771
+https://www.cnblogs.com/LipeiNet/p/5977028.html

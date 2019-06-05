@@ -1,0 +1,4 @@
+long sysDate = System.currentTimeMillis();
+System.out.println(System.currentTimeMillis() - sysDate);
+sysDate = System.currentTimeMillis();
+System.out.println(System.currentTimeMillis() - sysDate);

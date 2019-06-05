@@ -1,0 +1,29 @@
+https://blog.csdn.net/hemin1003/article/details/82038244
+
+
+https://blog.csdn.net/vbirdbest/article/details/79573740
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+面试题
+https://www.cnblogs.com/3xmq/p/springboot.html
+
+https://blog.csdn.net/zl1zl2zl3/article/details/83715633
+
+
+依赖项可以被分为
+
+Spring - core，beans，context，aop
+
+Web MVC - （Spring MVC）
+
+Jackson - for JSON Binding
+
+Validation - Hibernate,Validation API
+
+Enbedded Servlet Container - Tomcat
+
+Logging - logback,slf4j
+
+任何经典的 Web 应用程序都会使用所有这些依赖项。Spring Boot Starter Web 预先打包了这些依赖项。

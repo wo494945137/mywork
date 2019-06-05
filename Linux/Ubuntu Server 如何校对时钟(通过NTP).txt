@@ -1,0 +1,2 @@
+sudo apt-get install ntpdate
+sudo ntpdate -u ntp.ubuntu.com

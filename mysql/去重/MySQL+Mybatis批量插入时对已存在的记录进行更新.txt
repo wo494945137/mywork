@@ -1,0 +1,32 @@
+
+	<insert id="addActiveTerminalStatics" parameterType="List">
+		insert into tms_report_active_terminal_statistics (
+			active_terminal_count,
+			statistics_time_of_hour,
+			manufacturer,
+			model_name
+		)
+		values
+		<foreach  collection="list" item="item" separator=",">  
+		 (
+			#{item.active_terminal_count},
+			#{item.time_of_hour},
+			#{item.manufacturer},
+			#{item.model_name}
+		)
+		</foreach>
+		ON DUPLICATE KEY UPDATE 
+			active_terminal_count = VALUES(active_terminal_count)
+	</insert>
+
+
+1）以上xml写的sql语句实现了批量插入功能，如果数据库中已经存在要插入记录，则进行更新操作，其表中定义的自增主键id并不会变化。
+
+2）批量插入对已存在的记录更新的另一种方法：
+
+replace into 虽然可以更新已存在的记录，但是表中定义的自增主键id会变化。
+--------------------- 
+作者：hack_tianyu 
+来源：CSDN 
+原文：https://blog.csdn.net/zzz3112362088/article/details/78582154 
+版权声明：本文为博主原创文章，转载请附上博文链接！

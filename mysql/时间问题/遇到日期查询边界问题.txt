@@ -1,0 +1,36 @@
+
+mysql between and 遇到日期查询边界问题
+
+最近实现一个按日期范围查询列表，例如输入的是日期 2015-11-01到2015-11-03，想得到1号到3号的数据，
+
+执行 select * from table where create_date between '2015-11-01' and '2015-11-03' 结果是1号到2号的数据，这是因为时间范围是1号0时0分0秒到3号0时0分0秒之间的数据，
+
+只需要把后面的日期加一天即可。
+
+修改，使用date_add方法
+
+select * from table where create_date between '2015-11-01' and date_add('2015-11-03',interval 1 day); 
+
+OK！
+
+MySQL 日期加减：
+
+DATE_ADD(date,INTERVAL expr type) --加法
+DATE_SUB(date,INTERVAL expr type) --减法
+
+
+
+SELECT
+	count(0)
+FROM
+	lot_event_alarm a
+WHERE
+	1 = 1
+--  AND date_format(a.happened_time, '%Y-%m-%d') >= date_format('2018-07-26 00:00:00.0', '%Y-%m-%d')
+--  AND date_format(a.happened_time, '%Y-%m-%d') <= date_format('2018-07-26 00:00:00.0', '%Y-%m-%d')
+
+AND a.happened_time >= date_format('2018-07-26 00:00:00.0', '%Y-%m-%d')
+ AND a.happened_time <= date_format(date_add('2018-07-26 00:00:00.0',interval 1 day),'%Y-%m-%d')
+
+-- AND a.happened_time between date_format('2018-07-26 00:00:00.0', '%Y-%m-%d')and date_format('2018-07-26 00:00:00.0', '%Y-%m-%d')
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,15 @@
+遇到主机redis使用localhost和127.0.0.1都可以访问，但是使用主机ip访问就连接不上，三番查阅终得解药，拿好不谢！
+
+ 
+
+1.打开redis.windows.config文件（linux对应redis.conf文件），将NETWORK下bind 127.0.0.1注释掉，将protected-mode yes改为protected-mode no；
+
+ 
+
+2.同理修改redis.windows.server.config文件中相应内容；
+
+ 
+
+3.重启redis服务，即可使用ip访问redis了
+
+注意：如果在生产环境中，只有主机访问redis，则不需要修改，保证redis数据安全，使用localhost或127.0.0.1访问即可！

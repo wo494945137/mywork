@@ -1,0 +1,65 @@
+
+ <!DOCTYPE html>
+  <html>
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <title>Charles-WebSocket</title>
+  
+
+</head>
+ <body>
+     
+     <button onclick="buildConnection();">开始建立链接</button>
+     <hr>
+     <input id="sendMsg" /> <button onclick="sendMessage();">消息发送</button>
+	 <div id="aa"></div>
+ 
+ </body>
+ 
+  <script type="text/javascript">
+     
+     var websocket = null;
+     var target = "ws://10.20.1.240:4535/";
+     
+     function buildConnection() {
+         
+         if('WebSocket' in window) {
+             websocket = new WebSocket(target);        
+         } else if('MozWebSocket' in window) {
+             websocket = MozWebSocket(target);
+         } else {
+             window.alert("浏览器不支持WebSocket");
+         }
+		 
+		  //接收到消息的回调方法
+		websocket.onmessage = function (event) {
+		document.getElementById("aa").innerHTML += event.data +'<br/>';
+        console.log(event.data);//后台不间断发送数据，持续接收。
+    }
+ 
+		//断开 web socket 连接成功触发事件
+		websocket.onclose = function () {
+        alert("连接已关闭...");
+    };
+     }
+     
+     // 往后台服务器发送消息.
+     function sendMessage() {
+         
+         var sendmsg = document.getElementById("sendMsg").value;
+         console.log("发送的消息：" + sendmsg);
+         
+         // 发送至后台服务器中.
+         websocket.send(sendmsg);
+     }
+	 
+	     // 建立 web socket 连接成功触发事件
+ //   target.onopen = function () {
+  //      var json="{'a':'1','b':'2'}"
+ //        ws.send(json);//可以给后台发送参数
+ //   };
+ 
+   
+     
+ </script>
+ </html>

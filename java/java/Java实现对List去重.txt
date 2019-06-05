@@ -1,0 +1,40 @@
+Java实现对List去重
+方式一，使用for循环遍历去除List中的重复元素代码如下
+
+复制代码
+ 　 public static void main(String[] args) {
+        Test07 test07 = new Test07();
+        System.out.println(test07.getList());
+    }
+
+    public List getList() {
+        List originalList = new ArrayList();
+        originalList.add(1);
+        originalList.add(3);
+        originalList.add(3);
+        originalList.add(5);
+        originalList.add(7);
+        originalList.add(7);
+        originalList.add(13);
+
+        List tempList = new ArrayList();
+        for (Object object : originalList) {
+            if (!tempList.contains(object)) {
+                tempList.add(object);
+            }
+        }
+        return tempList;
+    }
+复制代码
+方式二，使用Set去重代码片段如下
+
+　　　　　// 利用set集合唯一性去重
+        Set set = new HashSet(originalList);
+        List tempList = new ArrayList(set);
+        return tempList;
+方式三，使用 TreeSet去除重复元素
+
+　　　　 TreeSet treeSet = new TreeSet(originalList);
+        List tempList = new ArrayList();
+        tempList.addAll(treeSet);
+        return tempList;

@@ -1,0 +1,14 @@
+
+一、查看是否安装了docker
+yum list installed | grep docker
+
+二、如果有卸载docker，没有跳过
+yum -y remove docker-engine.x86_64
+
+
+
+三、 rm -rf /etc/systemd/system/docker.service.d
+
+四、 rm -rf /var/lib/docker
+
+五、 rm -rf /var/run/docker

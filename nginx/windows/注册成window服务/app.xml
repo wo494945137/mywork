@@ -1,0 +1,7 @@
+<service>
+  <id>hlinin-web</id>
+  <name>hlinin-web</name>
+  <description>hlinin-web</description>
+  <executable>nginx.exe</executable>
+  <logmode>rotate</logmode>
+</service>

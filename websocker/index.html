@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>stomp</title>
+</head>
+
+<body>
+    Welcome<br/><input id="text" type="text" />
+    <button onclick="send()">发送消息</button>
+    <hr/>
+    <div id="message"></div>
+</body>
+
+<script type="text/javascript">
+    var  wsServer = 'ws://localhost:4535'; 
+var  websocket = new WebSocket(wsServer); 
+websocket.onopen = function (evt) { onOpen(evt) }; 
+websocket.onclose = function (evt) { onClose(evt) }; 
+websocket.onmessage = function (evt) { onMessage(evt) }; 
+websocket.onerror = function (evt) { onError(evt) }; 
+function onOpen(evt) { 
+console.log("Connected to WebSocket server."); 
+} 
+function onClose(evt) { 
+console.log("Disconnected"); 
+} 
+function onMessage(evt) { 
+setMessageInnerHTML('Retrieved data from server: ' + evt.data); 
+console.log('event: ' + evt.data); 
+} 
+function onError(evt) { 
+console.log('Error occured: ' + evt.data); 
+}
+
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
+
+    function send() {
+        websocket.send(document.getElementById("text").value);
+    }
+</script>
+
+</html>

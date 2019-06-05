@@ -1,0 +1,67 @@
+地址
+https://blog.csdn.net/tracyclock/article/details/78672711
+
+
+
+SpringBoot如何添加拦截器
+2017年11月30日 10:04:45 Tracyclock 阅读数：42071
+在web开发的过程中，为了实现登录权限验证，我们往往需要添加一个拦截器在用户的的请求到达controller层的时候实现登录验证，那么SpringBoot如何添加拦截器呢？
+
+步骤如下：
+
+1.继承WebMvcConfigureAdapter类，覆盖其addInterceptors接口,注册我们自定义的拦截器：
+
+/** 
+ * 
+ * 注册拦截器 
+ * Created by SYSTEM on 2017/8/16. 
+ */  
+public class WebAppConfig extends WebMvcConfigurerAdapter {  
+  
+    @Override  
+    public void addInterceptors(InterceptorRegistry registry) {  
+        //注册自定义拦截器，添加拦截路径和排除拦截路径  
+        registry.addInterceptor(new InterceptorConfig()).addPathPatterns("api/path/**").excludePathPatterns("api/path/login");  
+    }  
+} 
+2.实现HandlerInterceptor接口，重写接口中的三个方法：
+public class InterceptorConfig  implements HandlerInterceptor{  
+  
+    private static final Logger log = LoggerFactory.getLogger(InterceptorConfig.class);  
+  
+    /** 
+     * 进入controller层之前拦截请求 
+     * @param httpServletRequest 
+     * @param httpServletResponse 
+     * @param o 
+     * @return 
+     * @throws Exception 
+     */  
+    @Override  
+    public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {  
+  
+        log.info("---------------------开始进入请求地址拦截----------------------------");  
+        HttpSession session = httpServletRequest.getSession();  
+        if(!StringUtils.isEmpty(session.getAttribute("userName"))){  
+            return true;  
+        }  
+        else{  
+            PrintWriter printWriter = httpServletResponse.getWriter();  
+            printWriter.write("{code:0,message:\"session is invalid,please login again!\"}");  
+            return false;  
+        }  
+  
+    }  
+  
+    @Override  
+    public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {  
+        log.info("--------------处理请求完成后视图渲染之前的处理操作---------------");  
+    }  
+  
+    @Override  
+    public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {  
+        log.info("---------------视图渲染之后的操作-------------------------0");  
+    }  
+}  
+
+这样我们就可以在用户请求到达controller层实现登录拦截了，所有用户请求都会被拦截，在prehandle方法进行登录判断，返回true则验证通过，否则失败

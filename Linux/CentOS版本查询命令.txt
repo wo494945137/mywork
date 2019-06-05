@@ -1,0 +1,67 @@
+1.查看操作系统版本。
+
+[root@localhost etc]# cat /etc/redhat-release
+
+CentOS release 6.5 (Final)
+
+2.列出所有版本信息。
+
+[root@localhostetc]# lsb_release -a
+
+LSB Version:    :base-4.0-amd64:base-4.0-noarch:core-4.0-amd64:core-4.0-noarch:graphics-4.0-amd64:graphics-4.0-noarch:printing-4.0-amd64:printing-4.0-noarch
+
+Distributor ID:CentOS
+
+Description:    CentOS release 6.5 (Final)
+
+Release:        6.5
+
+Codename:       Final
+
+注:这个命令适用于所有的linux，包括Redhat、SuSE、Debian等发行版。
+
+3.查看linux内核版本。
+
+[root@mongo02 ~]# cat /proc/version
+
+Linux version 2.6.32-358.el6.x86_64 (mockbuild@c6b8.bsys.dev.centos.org) (gcc version 4.4.7
+
+20120313 (Red Hat 4.4.7-3) (GCC) ) #1 SMP Fri Feb 22 00:31:26 UTC 2013 
+
+ 
+
+[root@mongo02 ~]# uname -a
+
+Linux mongo02 2.6.32-358.el6.x86_64 #1 SMP Fri Feb 22 00:31:26 UTC 2013 x86_64 x86_64
+
+x86_64 GNU/Linux   
+
+ 
+
+[root@mongo02 ~]# uname -r
+
+2.6.32-358.el6.x86_64
+
+4.查看系统是不是64位。
+
+[root@localhostetc]# getconf LONG_BIT
+
+64
+
+[root@localhost etc]# file /bin/ls
+
+/bin/ls: ELF 64-bit LSB executable, x86-64,version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.18,stripped
+
+ 
+
+[root@localhost etc]# lsb_release -a
+
+LSB Version:   :base-4.0-amd64:base-4.0-noarch:core-4.0-amd64:core-4.0-noarch:graphics-4.0-amd64:graphics-4.0-noarch:printing-4.0-amd64:printing-4.0-noarch
+
+Distributor ID: CentOS
+
+Description:    CentOS release 6.5 (Final)
+
+Release:        6.5
+
+Codename:       Final

@@ -1,0 +1,45 @@
+在 /etc/sysconfig/network-scripts 路径下找到 ifcfg-* ，* 代表具体网卡，本文修改的网卡是 ifcfg-enp0s3 ，你的有可能是 ifcfg-eth0 ，除 ONBOOT 和 BOOTPROTO 修改外，其他几项为新增。修改后内容参见下文。
+
+TYPE=Ethernet
+BOOTPROTO=static
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_FAILURE_FATAL=no
+NAME=enp0s3
+UUID=1538d24b-770f-44ee-83af-e1da305dfabc
+DEVICE=enp0s3
+ONBOOT=yes
+IPADDR0=192.168.1.121
+PREFIX=24
+IPV6_PEERDNS=yes
+IPV6_PEERROUTES=yes
+IPV6_PRIVACY=no
+DNS1=202.96.134.133
+DNS2=202.96.128.166
+GATWAY0=192.168.1.1
+
+#static assignment
+ONBOOT=yes #开机启动
+BOOTPROTO=static #静态IP
+IPADDR=192.168.1.151 #本机地址
+NETMASK=255.255.255.0 #子网掩码
+GATEWAY=192.168.1.1 #默认网关
+DNS1=10.20.1.37
+DNS2=114.114.114.114
+
+
+重置网络配置
+service network restart
+查看网路配置
+ip addr
+
+关闭防火墙
+
+systemctl stop firewalld.service #停止firewall
+
+systemctl disable firewalld.service #禁止firewall开机启动
+
+firewall-cmd --state

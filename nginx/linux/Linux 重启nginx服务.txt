@@ -1,0 +1,35 @@
+ps -ef | grep nginx 查看进程
+
+[root@qiangge ~]# chkconfig --add nginx
+
+开机启动：
+
+[root@qiangge ~]# chkconfig nginx on
+
+启动Nginx
+
+[root@qiangge ~]# service nginx start
+
+停止Nginx
+
+[root@qiangge ~]# service nginx stop
+
+再启动Nginx
+
+[root@qiangge ~]# service nginx start
+
+重新启动Nginx
+
+[root@qiangge ~]# service nginx restart
+
+指定配置启动
+ 启动代码格式：nginx安装目录地址 -c nginx配置文件地址
+
+例如：
+[root@LinuxServer sbin]# /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
+个人经历：
+nginx -c /usr/local/nginx/conf/nginx.conf 是可以的
+
+重新加载：
+nginx -s reload -c /usr/local/meeting.conf
+

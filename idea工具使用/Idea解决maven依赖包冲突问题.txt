@@ -1,0 +1,6 @@
+首先是检查依赖包的程序；
+另外一个使用mvn dependency:tree > tree.txt 把依赖树都打印出来的
+
+
+
+最后找到了个特别牛逼的工具，是一个IDEA插件，叫Maven Helper，在 File->Settings->Plugins里安装就好了，另外这个工具依赖maven intergration，在安装后一定也要把它打上勾，然后重启IDEA。重启后，你打开你的pom.xml，编辑器左下角会多出来个“Dependency Analyzer”，打开后会发现，丫把所有依赖包的版本和冲突全都列出来了，而且还会把冲突包的路径显示出来，这时候你只要把冲突包的所有低版本从pom中exclude掉就好了，太他妈好用了。

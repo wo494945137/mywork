@@ -1,0 +1,29 @@
+  
+
+开始时间与结束时间同时存在不能在数据库里的区间里
+
+
+
+ /**
+     * 判断会议室是否被占用
+     */
+     public int   toDecide(Integer meetingRoomId,Date startTime,Date endTime,Integer meetingId){
+     //判断该会议室是否被占用
+         Map<String,Object> map = new HashMap();
+         map.put("meetingRoomId",meetingRoomId);
+         List<Meeting> meetingList = this.listByParam(map);
+         if(meetingList!=null &&meetingList.size()>0){
+             for (Meeting me:meetingList) {
+                 if ((startTime.getTime()>=me.getStartTime().getTime()&&startTime.getTime()<me.getEndTime().getTime())||endTime.getTime()>me.getStartTime().getTime()&&endTime.getTime()<=me.getEndTime().getTime()){
+                     //编辑的时候 排除过自身
+                     if(meetingId!=null&& String.valueOf(me.getId()).equals(String.valueOf(meetingId))){
+                         return 1;
+                     }
+                     throw new BusinessException("该会议室当前时间已被占用！");
+
+                 }else if(startTime.getTime()<=me.getStartTime().getTime()&&endTime.getTime()>=me.getEndTime().getTime())
+                     throw new BusinessException("该会议室当前时间已被占用！");
+             }
+         }
+                return 1;
+     }

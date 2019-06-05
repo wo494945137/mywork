@@ -1,0 +1,30 @@
+  
+SELECT * FROM
+        (
+SELECT
+        a.id,
+        a.station_id,
+        a.station_name,
+        a.operator_name,
+        a.operator_phone,
+        a.operator_id,
+        a.build_status,
+        a.build_date,
+        CASE WHEN a.build_status = 1 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>2 THEN '达成意向'
+        WHEN a.build_status = 2 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>2 THEN '待施工'
+        WHEN a.build_status = 4 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>30 THEN '已安排施工'
+        WHEN a.build_status = 5 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>3 THEN  '施工完成'
+        END  AS overtime_state,
+        CASE WHEN a.build_status = 1 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>2 THEN TIMESTAMPDIFF(DAY,a.build_date,NOW())-2
+        WHEN a.build_status = 2 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>2 THEN TIMESTAMPDIFF(DAY,a.build_date,NOW())-2
+        WHEN a.build_status = 4 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>30 THEN TIMESTAMPDIFF(DAY,a.build_date,NOW())-30
+        WHEN a.build_status = 5 AND TIMESTAMPDIFF(DAY,a.build_date,NOW())>3 THEN  TIMESTAMPDIFF(DAY,a.build_date,NOW())-3
+        END  AS overtime_day
+        
+from (
+select max(build_status) as build_status,station_id from ap_station_build_log 
+GROUP by  station_id
+) t LEFT JOIN ap_station_build_log a on t.station_id = a.station_id and t.build_status = a.build_status
+
+) AS tt
+        WHERE tt.overtime_state is not null

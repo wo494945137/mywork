@@ -1,0 +1,5 @@
+node是个运行环境，提供了一些依赖，可以当做是java的jdk   可以作为web容器
+
+1、npm install           ---安装项目所需要的依赖包
+2、npm run build            ---编译打包，因为目前浏览器大部分不支持ES6，编译后把ES6转换为ES5， 在项目的根目录会生成一个dist的路径
+3、npm run dev        ---启动dev入口点

@@ -1,0 +1,39 @@
+
+//第三方表
+ CREATE TABLE
+    tdept
+    (
+        id INT,
+        name VARCHAR(100),
+        pid INT,
+        PRIMARY KEY (id)
+    )
+    ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='tdept';
+    
+ //前面四个字段是我们系统的字段，后面两个是第三方表的
+
+ CREATE TABLE
+    depttmp
+    (
+        id INT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(100),
+        search_code VARCHAR(300) COMMENT '查询码',
+        full_name VARCHAR(600) COMMENT '全路径',
+        pid INT,
+        old_id INT,
+        old_pid INT,
+        PRIMARY KEY (id)
+    )
+    ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='tdept';
+    
+    ALTER TABLE depttmp
+  AUTO_INCREMENT = 100;
+  
+  //插入第三方表的信息
+  
+  INSERT INTO depttmp (name, search_code,pid, old_id, old_pid) 
+select name,null,null,id,pid from tdept
+
+//更新关系
+update depttmp a left join depttmp b on a.old_pid=b.old_id set a.pid = b.id;
+update depttmp set  pid = 1 where pid is null;
